@@ -3,1508 +3,942 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuiviDR - Tableau de Bord Intelligent</title>
+    <title>SuiviDR Pro - Pilotage de Projets</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        :root {
-            --primary: #4361ee;
-            --primary-light: #4895ef;
-            --secondary: #3f37c9;
-            --accent: #f72585;
-            --success: #4cc9f0;
-            --warning: #f8961e;
-            --danger: #ef233c;
-            --dark: #2b2d42;
-            --light: #f8f9fa;
-            --gray: #8d99ae;
-            --card-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f5f7ff;
-            color: var(--dark);
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            background: linear-gradient(180deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 30px 0;
-            position: relative;
-            z-index: 10;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
-        }
-
-        .app-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        .app-icon {
-            width: 50px;
-            height: 50px;
-            background-color: white;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-        }
-
-        .app-icon i {
-            color: var(--primary);
-            font-size: 24px;
-        }
-
-        .app-name {
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        .nav-menu {
-            list-style: none;
-        }
-
-        .nav-item {
-            margin-bottom: 5px;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 12px 25px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            color: white;
-            background-color: rgba(255,255,255,0.1);
-        }
-
-        .nav-link:hover::before, .nav-link.active::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background-color: white;
-        }
-
-        .nav-link i {
-            margin-right: 12px;
-            font-size: 18px;
-        }
-
-        /* Main Content */
-        .main-content {
-            padding: 30px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .page-title h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .page-title p {
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 15px;
-            font-weight: 600;
-        }
-
-        /* Dashboard Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background-color: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: var(--card-shadow);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .stat-icon.primary {
-            background-color: rgba(67, 97, 238, 0.1);
-            color: var(--primary);
-        }
-
-        .stat-icon.warning {
-            background-color: rgba(248, 150, 30, 0.1);
-            color: var(--warning);
-        }
-
-        .stat-icon.success {
-            background-color: rgba(76, 201, 240, 0.1);
-            color: var(--success);
-        }
-
-        .stat-icon.danger {
-            background-color: rgba(239, 35, 60, 0.1);
-            color: var(--danger);
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-
-        /* Analytics Section */
-        .analytics-section {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .chart-card {
-            background-color: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .chart-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .chart-actions select {
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid #eee;
-            background-color: #f9f9f9;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
-        /* Recent DR Section */
-        .dr-section {
-            background-color: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .dr-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .dr-table th {
-            text-align: left;
-            padding: 12px 15px;
-            background-color: #f9f9f9;
-            color: var(--gray);
-            font-weight: 500;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-        }
-
-        .dr-table td {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            vertical-align: middle;
-        }
-
-        .dr-number {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .status-urgent {
-            background-color: rgba(239, 35, 60, 0.1);
-            color: var(--danger);
-        }
-
-        .status-validate {
-            background-color: rgba(248, 150, 30, 0.1);
-            color: var(--warning);
-        }
-
-        .status-pending {
-            background-color: rgba(67, 97, 238, 0.1);
-            color: var(--primary);
-        }
-
-        .status-completed {
-            background-color: rgba(76, 201, 240, 0.1);
-            color: var(--success);
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--gray);
-            margin-left: 10px;
-            transition: color 0.3s ease;
-        }
-
-        .action-btn:hover {
-            color: var(--primary);
-        }
-
-        /* Form Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-            animation: modalFadeIn 0.3s ease;
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray);
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--secondary);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid #ddd;
-            color: var(--dark);
-        }
-
-        .btn-outline:hover {
-            background-color: #f9f9f9;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .analytics-section {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .app-container {
-                grid-template-columns: 80px 1fr;
-            }
-            .app-name, .nav-link span {
-                display: none;
-            }
-            .nav-link {
-                justify-content: center;
-                padding: 15px 0;
-            }
-            .nav-link i {
-                margin-right: 0;
-                font-size: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .app-container {
-                grid-template-columns: 1fr;
-            }
-            .sidebar {
-                display: none;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        :root, :root.light {
+            --primary: #4361ee; --primary-light: #4895ef; --secondary: #3f37c9; --accent: #f72585;
+            --success: #4cc9f0; --warning: #f8961e; --danger: #ef233c; --dark: #2b2d42; --light: #f8f9fa;
+            --gray: #8d99ae; --card-shadow: 0 10px 20px rgba(0,0,0,0.1); --bg-body: #f8f9fa; --bg-card: white;
+            --text-color: #2b2d42; --border-color: #eee;
+        }
+        :root.dark {
+            --primary: #3a86ff; --primary-light: #4895ef; --secondary: #8338ec; --accent: #ff006e;
+            --success: #06d6a0; --warning: #ffbe0b; --danger: #ef233c; --dark: #f8f9fa; --light: #121212;
+            --gray: #6c757d; --card-shadow: 0 10px 20px rgba(0,0,0,0.3); --bg-body: #1e1e1e; --bg-card: #2c2c2c;
+            --text-color: #f8f9fa; --border-color: #444;
+        }
+        :root.blue {
+            --primary: #4361ee; --primary-light: #4895ef; --secondary: #3a0ca3; --accent: #7209b7;
+            --success: #4cc9f0; --warning: #f8961e; --danger: #ef233c; --dark: #2b2d42; --light: #f0f4ff;
+            --gray: #6c757d; --card-shadow: 0 10px 20px rgba(67,97,238,0.2); --bg-body: #f0f4ff; --bg-card: white;
+            --text-color: #2b2d42; --border-color: #e0e6f5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+        .app-container { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
+        .sidebar { background: linear-gradient(180deg, var(--primary), var(--secondary)); color: white; padding: 30px 0; z-index: 10; box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
+        .app-logo { display: flex; align-items: center; justify-content: center; margin-bottom: 40px; }
+        .app-icon { width: 50px; height: 50px; background-color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 10px; }
+        .app-icon i { color: var(--primary); font-size: 24px; }
+        .app-name { font-weight: 700; font-size: 1.2rem; }
+        .nav-menu { list-style: none; }
+        .nav-item { margin-bottom: 5px; }
+        .nav-link { display: flex; align-items: center; padding: 12px 25px; color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.3s ease; position: relative; }
+        .nav-link:hover, .nav-link.active { color: white; background-color: rgba(255,255,255,0.1); }
+        .nav-link:hover::before, .nav-link.active::before { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 4px; background-color: white; }
+        .nav-link i { margin-right: 12px; font-size: 18px; }
+        .main-content { padding: 30px; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-title h1 { font-size: 1.8rem; font-weight: 600; color: var(--text-color); }
+        .page-title p { color: var(--gray); font-size: 0.9rem; }
+        .user-profile { display: flex; align-items: center; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; display: flex; align-items: center; justify-content: center; margin-left: 15px; font-weight: 600; }
+        .card { background-color: var(--bg-card); border-radius: 15px; padding: 20px; box-shadow: var(--card-shadow); margin-bottom: 30px; border: 1px solid var(--border-color); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; box-shadow: var(--card-shadow); transition: transform 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .stat-icon.primary { background-color: rgba(67, 97, 238, 0.1); color: var(--primary); }
+        .stat-icon.warning { background-color: rgba(248, 150, 30, 0.1); color: var(--warning); }
+        .stat-icon.success { background-color: rgba(76, 201, 240, 0.1); color: var(--success); }
+        .stat-icon.danger { background-color: rgba(239, 35, 60, 0.1); color: var(--danger); }
+        .stat-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 5px; }
+        .stat-label { color: var(--gray); font-size: 0.9rem; }
+        .analytics-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .chart-title { font-size: 1.2rem; font-weight: 600; }
+        .chart-container { position: relative; height: 300px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-title { font-size: 1.2rem; font-weight: 600; }
+        .dr-table { width: 100%; border-collapse: collapse; }
+        .dr-table th { text-align: left; padding: 12px 15px; background-color: var(--bg-body); color: var(--gray); font-weight: 500; font-size: 0.8rem; text-transform: uppercase; }
+        .dr-table td { padding: 15px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .dr-number { font-weight: 600; color: var(--primary); }
+        .status-badge { display: inline-block; padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 500; text-transform: capitalize; }
+        .status-badge.status-urgent { background-color: rgba(239, 35, 60, 0.1); color: var(--danger); }
+        .status-badge.status-a-valider { background-color: rgba(248, 150, 30, 0.1); color: var(--warning); }
+        .status-badge.status-cmd-en-attente, .status-badge.status-normal { background-color: rgba(67, 97, 238, 0.1); color: var(--primary); }
+        .status-badge.status-termine { background-color: rgba(76, 201, 240, 0.1); color: var(--success); }
+        .status-badge.status-annule { background-color: rgba(108, 117, 125, 0.1); color: var(--gray); }
+        .action-btn { background: none; border: none; cursor: pointer; color: var(--gray); margin: 0 5px; transition: color 0.3s ease; }
+        .action-btn:hover { color: var(--primary); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background-color: var(--bg-card); border-radius: 15px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.2); animation: modalFadeIn 0.3s ease; }
+        @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 1.3rem; font-weight: 600; }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray); }
+        .modal-body { padding: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 8px; font-family: 'Poppins', sans-serif; transition: border-color 0.3s ease; background-color: var(--bg-body); color: var(--text-color); }
+        .form-control:focus { outline: none; border-color: var(--primary); }
+        .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+        .btn { padding: 12px 20px; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; border: none; font-family: 'Poppins', sans-serif; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--secondary); }
+        .btn-outline { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-color); }
+        .btn-outline:hover { background-color: var(--bg-body); }
+        .list-manager { display: flex; gap: 10px; margin-top: 10px; }
+        .list-items { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .list-item { background-color: var(--primary-light); color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        .list-item button { background: none; border: none; color: white; cursor: pointer; font-size: 0.8rem; }
+        .notification-bell { position: relative; cursor: pointer; margin-right: 20px; }
+        .notification-badge { position: absolute; top: -5px; right: -8px; background-color: var(--danger); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-card); }
+        .notifications-panel { display: none; position: absolute; top: 50px; right: 0; width: 320px; background-color: var(--bg-card); border-radius: 10px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); z-index: 1000; }
+        .notifications-panel-header { padding: 15px; font-weight: 600; border-bottom: 1px solid var(--border-color); }
+        .notifications-list { max-height: 300px; overflow-y: auto; }
+        .notification-item { display: flex; align-items: center; gap: 10px; padding: 15px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+        .notification-item:last-child { border-bottom: none; }
+        .notification-item i { color: var(--warning); }
+        .notification-item.danger i { color: var(--danger); }
+        .notification-item-content { font-size: 0.9rem; }
+        .toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: var(--dark); color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 9999; transition: bottom 0.5s ease-in-out; }
+        .toast.show { bottom: 30px; }
+        .filter-controls { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .history-item { padding: 10px; border-bottom: 1px dashed var(--border-color); font-size: 0.9em; }
+        .history-item:last-child { border-bottom: none; }
+        .history-timestamp { color: var(--gray); font-size: 0.8em; display: block; }
+        tr.highlight { animation: highlight 2s; }
+        @keyframes highlight {
+            0% { background-color: rgba(255, 255, 0, 0.5); }
+            100% { background-color: transparent; }
+        }
+        @media (max-width: 992px) { .app-container { grid-template-columns: 80px 1fr; } .app-name, .nav-link span { display: none; } .nav-link { justify-content: center; padding: 15px 0; } .nav-link i { margin-right: 0; font-size: 20px; } .analytics-section { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 576px) { .app-container { grid-template-columns: 1fr; } .sidebar { display: none; } .stats-grid, .analytics-section { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
+    <div id="loader" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-body); z-index:10000; display:flex; align-items:center; justify-content:center;">
+        <i class="fas fa-sync-alt fa-spin fa-3x" style="color: var(--primary);"></i>
+    </div>
+    
     <div class="app-container">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="app-logo">
-                <div class="app-icon">
-                    <i class="fas fa-thumbs-up"></i>
-                </div>
-                <span class="app-name">SuiviDR</span>
+                <div class="app-icon"><i class="fas fa-thumbs-up"></i></div>
+                <span class="app-name">SuiviDR Pro</span>
             </div>
-            
             <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active" onclick="showSection('dashboard')">
-                        <i class="fas fa-chart-pie"></i>
-                        <span>Tableau de bord</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('dr-list')">
-                        <i class="fas fa-list-ul"></i>
-                        <span>Liste des DR</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showModal('add-dr-modal')">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>Nouvelle DR</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('analytics')">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Analytiques</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="exportToExcel()">
-                        <i class="fas fa-file-excel"></i>
-                        <span>Export Excel</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('settings')">
-                        <i class="fas fa-cog"></i>
-                        <span>Paramètres</span>
-                    </a>
-                </li>
+                <li class="nav-item"><a href="#" class="nav-link active" onclick="showSection('dashboard')"><i class="fas fa-chart-pie"></i><span>Tableau de bord</span></a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="showSection('dr-list')"><i class="fas fa-list-ul"></i><span>Liste des DR</span></a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="openNewDRModal()"><i class="fas fa-plus-circle"></i><span>Nouvelle DR</span></a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="showSectionWithAuth('settings')"><i class="fas fa-cog"></i><span>Paramètres</span></a></li>
             </ul>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Header -->
-            <div class="header">
+            <header class="header">
                 <div class="page-title">
-                    <h1>Tableau de Bord</h1>
-                    <p>Analyse et suivi des demandes de réalisation</p>
+                    <h1 id="page-title-text">Tableau de Bord</h1>
+                    <p id="page-subtitle-text">Analyse et suivi des demandes</p>
                 </div>
                 <div class="user-profile">
-                    <span>Administrateur</span>
+                    <div class="notification-bell" onclick="toggleNotifications(event)">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span class="notification-badge" id="notification-count" style="display: none;">0</span>
+                    </div>
+                    <div class="notifications-panel" id="notifications-panel">
+                        <div class="notifications-panel-header">Centre de Notifications</div>
+                        <div class="notifications-list" id="notifications-list"></div>
+                    </div>
+                    <span id="admin-name">Admin</span>
                     <div class="user-avatar">A</div>
                 </div>
-            </div>
+            </header>
 
-            <!-- Dashboard Section -->
             <section id="dashboard-section" class="section">
-                <!-- Stats Cards -->
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-value">24</div>
-                                <div class="stat-label">DR en cours</div>
-                            </div>
-                            <div class="stat-icon primary">
-                                <i class="fas fa-tasks"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-value">5</div>
-                                <div class="stat-label">DR urgentes</div>
-                            </div>
-                            <div class="stat-icon danger">
-                                <i class="fas fa-exclamation-circle"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-value">18</div>
-                                <div class="stat-label">DR terminées</div>
-                            </div>
-                            <div class="stat-icon success">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-value">3</div>
-                                <div class="stat-label">À valider</div>
-                            </div>
-                            <div class="stat-icon warning">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value" id="dr-in-progress">0</div><div class="stat-label">DR en cours</div></div><div class="stat-icon primary"><i class="fas fa-tasks"></i></div></div></div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value" id="dr-total-cost">0 €</div><div class="stat-label">Coût Total Estimé</div></div><div class="stat-icon success"><i class="fas fa-euro-sign"></i></div></div></div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value" id="dr-completed">0</div><div class="stat-label">DR terminées</div></div><div class="stat-icon success"><i class="fas fa-check-circle"></i></div></div></div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value" id="dr-avg-cost">0 €</div><div class="stat-label">Coût Moyen / DR</div></div><div class="stat-icon warning"><i class="fas fa-calculator"></i></div></div></div>
                 </div>
-
-                <!-- Analytics -->
                 <div class="analytics-section">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">Évolution des DR par statut</div>
-                            <div class="chart-actions">
-                                <select id="chart-period">
-                                    <option value="week">Cette semaine</option>
-                                    <option value="month" selected>Ce mois</option>
-                                    <option value="year">Cette année</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="status-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">Répartition par statut</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="pie-chart"></canvas>
-                        </div>
-                    </div>
+                    <div class="card chart-card"><div class="chart-header"><div class="chart-title">Répartition par Statut</div></div><div class="chart-container"><canvas id="status-pie-chart"></canvas></div></div>
+                    <div class="card chart-card"><div class="chart-header"><div class="chart-title">Répartition des Coûts par Statut</div></div><div class="chart-container"><canvas id="cost-pie-chart"></canvas></div></div>
                 </div>
-
-                <!-- Recent DR -->
-                <div class="dr-section">
-                    <div class="section-header">
-                        <div class="section-title">Dernières Demandes de Réalisation</div>
-                        <button class="btn btn-outline" onclick="showModal('add-dr-modal')">
-                            <i class="fas fa-plus"></i> Ajouter
-                        </button>
-                    </div>
-                    <table class="dr-table">
-                        <thead>
-                            <tr>
-                                <th>N° DR</th>
-                                <th>Objet</th>
-                                <th>Attributaire</th>
-                                <th>Date Limite</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="dr-number">DR-2023-045</td>
-                                <td>Aménagement espace détente</td>
-                                <td>Entreprise A</td>
-                                <td>15/06/2023</td>
-                                <td><span class="status-badge status-urgent">Urgent</span></td>
-                                <td>
-                                    <button class="action-btn" title="Éditer"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn" title="Supprimer"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="dr-number">DR-2023-044</td>
-                                <td>Réparation toiture bât. A</td>
-                                <td>Entreprise B</td>
-                                <td>20/06/2023</td>
-                                <td><span class="status-badge status-validate">À valider</span></td>
-                                <td>
-                                    <button class="action-btn" title="Éditer"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn" title="Supprimer"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="dr-number">DR-2023-043</td>
-                                <td>Installation climatisation</td>
-                                <td>Entreprise C</td>
-                                <td>10/07/2023</td>
-                                <td><span class="status-badge status-pending">CMD en attente</span></td>
-                                <td>
-                                    <button class="action-btn" title="Éditer"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn" title="Supprimer"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="dr-number">DR-2023-042</td>
-                                <td>Peinture bureaux</td>
-                                <td>Entreprise D</td>
-                                <td>05/06/2023</td>
-                                <td><span class="status-badge status-completed">Terminé</span></td>
-                                <td>
-                                    <button class="action-btn" title="Éditer"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn" title="Supprimer"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="card dr-section">
+                    <div class="section-header"><div class="section-title">Dernières Activités</div></div>
+                    <table class="dr-table"><thead><tr><th>N° DR</th><th>Objet</th><th>Attributaire</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="recent-dr-list"></tbody></table>
                 </div>
             </section>
 
-            <!-- DR List Section (Hidden by default) -->
             <section id="dr-list-section" class="section" style="display: none;">
-                <div class="section-header">
-                    <div class="section-title">Toutes les Demandes de Réalisation</div>
-                    <div>
-                        <button class="btn btn-outline" onclick="exportToExcel()">
-                            <i class="fas fa-file-excel"></i> Exporter
-                        </button>
-                        <button class="btn btn-primary" onclick="showModal('add-dr-modal')">
-                            <i class="fas fa-plus"></i> Nouvelle DR
-                        </button>
+                <div class="card">
+                    <div class="section-header"><div class="section-title">Toutes les Demandes</div></div>
+                    <div class="filter-controls">
+                        <input type="text" id="search-bar" class="form-control" placeholder="Rechercher...">
+                        <select id="filter-status" class="form-control"></select>
+                        <select id="filter-assignee" class="form-control"></select>
+                        <button class="btn btn-outline" onclick="resetFilters()">Réinitialiser</button>
                     </div>
-                </div>
-                <div class="dr-section">
-                    <table class="dr-table">
-                        <thead>
-                            <tr>
-                                <th>N° DR</th>
-                                <th>Objet</th>
-                                <th>Estimation</th>
-                                <th>Attributaire</th>
-                                <th>Date Limite</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="full-dr-list">
-                            <!-- Will be populated by JavaScript -->
-                        </tbody>
-                    </table>
+                    <table class="dr-table"><thead><tr><th>N° DR</th><th>Objet</th><th>Estimation</th><th>Attributaire</th><th>Jours Restants</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="full-dr-list"></tbody></table>
                 </div>
             </section>
-
-            <!-- Analytics Section (Hidden by default) -->
-            <section id="analytics-section" class="section" style="display: none;">
-                <div class="section-header">
-                    <div class="section-title">Analytiques Avancées</div>
-                </div>
-                <div class="analytics-section">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">Performance par attributaire</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="performance-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">Délai moyen de réalisation</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="timeline-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="dr-section" style="margin-top: 20px;">
-                    <div class="chart-header">
-                        <div class="chart-title">DR arrivant à échéance</div>
-                    </div>
-                    <table class="dr-table">
-                        <thead>
-                            <tr>
-                                <th>N° DR</th>
-                                <th>Objet</th>
-                                <th>Attributaire</th>
-                                <th>Jours restants</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="deadline-dr-list">
-                            <!-- Will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Settings Section (Hidden by default) -->
+            
             <section id="settings-section" class="section" style="display: none;">
-                <div class="section-header">
-                    <div class="section-title">Paramètres</div>
+                <div class="card">
+                    <div class="section-title">Paramètres Généraux</div>
+                    <div class="form-group"><label>Nom de l'administrateur</label><input type="text" id="admin-name-input" class="form-control"><button class="btn btn-primary" onclick="updateAdminName()" style="margin-top: 10px;">Enregistrer</button></div>
+                    <div class="form-group" style="margin-top: 30px;"><label>Thème de l'application</label><select class="form-control" id="theme-select"><option value="light">Clair</option><option value="dark">Sombre</option><option value="blue">Bleu</option></select></div>
                 </div>
-                <div class="dr-section">
+                <div class="card">
+                    <div class="section-title">Gestion des Données</div>
                     <div class="form-group">
-                        <label>Thème de l'application</label>
-                        <select class="form-control" id="theme-select">
-                            <option value="light">Clair</option>
-                            <option value="dark">Sombre</option>
-                            <option value="blue">Bleu</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-top: 20px;">
-                        <label>Sauvegarde des données</label>
+                        <label>Sauvegarde et Restauration</label>
                         <div style="display: flex; gap: 10px; margin-top: 10px;">
-                            <button class="btn btn-outline" onclick="backupData()">
-                                <i class="fas fa-download"></i> Sauvegarder
-                            </button>
-                            <button class="btn btn-outline" onclick="document.getElementById('restore-file').click()">
-                                <i class="fas fa-upload"></i> Restaurer
-                            </button>
+                            <button class="btn btn-outline" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Exporter Excel</button>
+                            <button class="btn btn-outline" onclick="backupData()"><i class="fas fa-download"></i> Sauvegarder JSON</button>
+                            <button class="btn btn-outline" onclick="document.getElementById('restore-file').click()"><i class="fas fa-upload"></i> Restaurer JSON</button>
                             <input type="file" id="restore-file" style="display: none;" accept=".json">
                         </div>
                     </div>
+                </div>
+                <div class="card">
+                    <div class="section-title">Listes personnalisées</div>
+                    <div class="form-group"><label>Gérer les Attributaires</label><div class="list-manager"><input type="text" id="new-assignee-input" class="form-control" placeholder="Ajouter..."><button class="btn btn-primary" onclick="addListItem('assignees')">Ajouter</button></div><div class="list-items" id="assignees-list"></div></div>
+                    <div class="form-group" style="margin-top: 30px;"><label>Gérer les Statuts</label><div class="list-manager"><input type="text" id="new-statuses-input" class="form-control" placeholder="Ajouter..."><button class="btn btn-primary" onclick="addListItem('statuses')">Ajouter</button></div><div class="list-items" id="statuses-list"></div></div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- Add DR Modal -->
-    <div class="modal" id="add-dr-modal">
+    <div class="modal" id="dr-modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Nouvelle Demande de Réalisation</div>
-                <button class="close-modal" onclick="hideModal('add-dr-modal')">&times;</button>
-            </div>
+            <div class="modal-header"><div class="modal-title" id="modal-title">Nouvelle Demande</div><button class="close-modal" onclick="hideModal('dr-modal')">&times;</button></div>
             <div class="modal-body">
                 <form id="dr-form">
+                    <input type="hidden" id="dr-id">
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label for="dr-number">N° DR *</label>
-                            <input type="text" id="dr-number" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="dr-object">Objet de la demande *</label>
-                            <input type="text" id="dr-object" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="dr-market-estimate">Estimation Marché (€)</label>
-                            <input type="number" id="dr-market-estimate" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="dr-market-number">N° Marché</label>
-                            <input type="text" id="dr-market-number" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="dr-assignee">Attributaire</label>
-                            <input type="text" id="dr-assignee" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="dr-notification-date">Date Notification</label>
-                            <input type="date" id="dr-notification-date" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="dr-execution-duration">Durée Exécution (jours)</label>
-                            <input type="number" id="dr-execution-duration" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="dr-deadline">Date Limite</label>
-                            <input type="date" id="dr-deadline" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="dr-received">Réceptionné</label>
-                            <select id="dr-received" class="form-control">
-                                <option value="non">Non</option>
-                                <option value="oui">Oui</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="dr-reception-date">Date Réception</label>
-                            <input type="date" id="dr-reception-date" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="dr-status">Statut</label>
-                            <select id="dr-status" class="form-control">
-                                <option value="normal">Normal</option>
-                                <option value="urgent">Urgent</option>
-                                <option value="validate">À valider</option>
-                                <option value="pending">CMD en attente</option>
-                                <option value="other">Autre</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="grid-column: span 2;">
-                            <label for="dr-notes">Observations</label>
-                            <textarea id="dr-notes" class="form-control" rows="3"></textarea>
-                        </div>
+                        <div class="form-group"><label for="dr-number">N° DR *</label><input type="text" id="dr-number" class="form-control" required></div>
+                        <div class="form-group"><label for="dr-object">Objet *</label><input type="text" id="dr-object" class="form-control" required></div>
+                        <div class="form-group"><label for="dr-marketEstimate">Estimation Marché (€)</label><input type="number" id="dr-marketEstimate" class="form-control"></div>
+                        <div class="form-group"><label for="dr-assignee">Attributaire</label><input type="text" id="dr-assignee" class="form-control" list="assignee-datalist"><datalist id="assignee-datalist"></datalist></div>
+                        <div class="form-group"><label for="dr-notificationDate">Date Notification</label><input type="date" id="dr-notificationDate" class="form-control"></div>
+                        <div class="form-group"><label for="dr-executionDuration">Durée Exécution (j)</label><input type="number" id="dr-executionDuration" class="form-control"></div>
+                        <div class="form-group"><label for="dr-deadline">Date Limite</label><input type="date" id="dr-deadline" class="form-control"></div>
+                        <div class="form-group"><label for="dr-status">Statut</label><select id="dr-status" class="form-control"></select></div>
+                        <div class="form-group" style="grid-column: span 2;"><label for="dr-notes">Observations</label><textarea id="dr-notes" class="form-control" rows="3"></textarea></div>
                     </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-outline" onclick="hideModal('add-dr-modal')">
-                            Annuler
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            Enregistrer
-                        </button>
-                    </div>
+                    <div class="form-actions"><button type="button" class="btn btn-outline" onclick="hideModal('dr-modal')">Annuler</button><button type="submit" class="btn btn-primary">Enregistrer</button></div>
                 </form>
             </div>
         </div>
     </div>
+    
+    <div class="modal" id="history-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header"><div class="modal-title" id="history-modal-title">Historique</div><button class="close-modal" onclick="hideModal('history-modal')">&times;</button></div>
+            <div class="modal-body" id="history-modal-body"></div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
 
     <script>
-        // Sample Data
-        let demandesRealisation = [
-            {
-                id: 1,
-                number: "DR-2023-045",
-                object: "Aménagement espace détente",
-                marketEstimate: 12500,
-                marketNumber: "M-2023-12",
-                assignee: "Entreprise A",
-                notificationDate: "2023-05-10",
-                executionDuration: 30,
-                deadline: "2023-06-15",
-                received: "non",
-                receptionDate: "",
-                status: "urgent",
-                notes: "Priorité haute - délai serré",
-                createdAt: "2023-05-10T09:15:00"
-            },
-            {
-                id: 2,
-                number: "DR-2023-044",
-                object: "Réparation toiture bât. A",
-                marketEstimate: 8500,
-                marketNumber: "M-2023-08",
-                assignee: "Entreprise B",
-                notificationDate: "2023-05-05",
-                executionDuration: 45,
-                deadline: "2023-06-20",
-                received: "non",
-                receptionDate: "",
-                status: "validate",
-                notes: "En attente de validation technique",
-                createdAt: "2023-05-05T14:30:00"
-            },
-            {
-                id: 3,
-                number: "DR-2023-043",
-                object: "Installation climatisation",
-                marketEstimate: 22000,
-                marketNumber: "M-2023-15",
-                assignee: "Entreprise C",
-                notificationDate: "2023-05-15",
-                executionDuration: 60,
-                deadline: "2023-07-10",
-                received: "non",
-                receptionDate: "",
-                status: "pending",
-                notes: "Commande en cours de préparation",
-                createdAt: "2023-05-15T11:20:00"
-            },
-            {
-                id: 4,
-                number: "DR-2023-042",
-                object: "Peinture bureaux",
-                marketEstimate: 7500,
-                marketNumber: "M-2023-05",
-                assignee: "Entreprise D",
-                notificationDate: "2023-04-20",
-                executionDuration: 20,
-                deadline: "2023-05-05",
-                received: "oui",
-                receptionDate: "2023-05-03",
-                status: "completed",
-                notes: "Travaux terminés avec succès",
-                createdAt: "2023-04-20T10:00:00"
-            },
-            {
-                id: 5,
-                number: "DR-2023-041",
-                object: "Remplacement fenêtres",
-                marketEstimate: 18000,
-                marketNumber: "M-2023-10",
-                assignee: "Entreprise E",
-                notificationDate: "2023-04-15",
-                executionDuration: 45,
-                deadline: "2023-05-30",
-                received: "oui",
-                receptionDate: "2023-05-28",
-                status: "completed",
-                notes: "Conformité totale au cahier des charges",
-                createdAt: "2023-04-15T16:45:00"
-            }
-        ];
+    // ========== CONFIG & GLOBAL STATE ==========
+    let demandesRealisation = [];
+    let adminSettings = {};
+    let charts = {};
+    let notificationsPanelVisible = false;
+    const TAUX_CONVERSION = 10.85; // 1 EUR = 10.85 MAD
+    const defaultAdminSettings = {
+        adminName: "Admin",
+        password: "admin",
+        assignees: ["Entreprise A", "Entreprise B", "Régie"],
+        statuses: ["Normal", "Urgent", "À valider", "CMD en attente", "Terminé", "Annulé"]
+    };
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load data from localStorage if available
-            const savedData = localStorage.getItem('suividr_data');
-            if (savedData) {
-                demandesRealisation = JSON.parse(savedData);
+    // ========== INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        const loader = document.getElementById('loader');
+        try {
+            loadData();
+            initializeAppUI();
+            initializeEventListeners();
+            renderAll();
+            setupFilters();
+        } catch (e) {
+            console.error("Erreur lors de l'initialisation de l'application :", e);
+            alert("Une erreur critique est survenue. L'application ne peut pas démarrer.");
+        } finally {
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+        }
+        
+        // Fermer les notifications si on clique ailleurs
+        document.addEventListener('click', (e) => {
+            if (notificationsPanelVisible && 
+                !e.target.closest('.notifications-panel') && 
+                !e.target.closest('.notification-bell')) {
+                toggleNotifications();
             }
+        });
+    });
 
-            // Initialize charts
-            initCharts();
+    function loadData() {
+        const savedData = localStorage.getItem('suividr_data');
+        const savedSettings = localStorage.getItem('suividr_settings');
+        
+        demandesRealisation = savedData ? JSON.parse(savedData) : [];
+        adminSettings = savedSettings ? JSON.parse(savedSettings) : {...defaultAdminSettings};
+        
+        // Migration pour les nouveaux champs si nécessaire
+        if (!adminSettings.password) {
+            adminSettings.password = defaultAdminSettings.password;
+        }
+    }
+
+    function initializeAppUI() {
+        const savedTheme = localStorage.getItem('suividr_theme') || 'light';
+        applyTheme(savedTheme);
+        document.getElementById('theme-select').value = savedTheme;
+        updateAdminDisplay(adminSettings.adminName);
+        document.getElementById('admin-name-input').value = adminSettings.adminName;
+    }
+
+    function initializeEventListeners() {
+        document.getElementById('dr-form').addEventListener('submit', handleFormSubmit);
+        document.getElementById('restore-file').addEventListener('change', restoreData);
+        document.getElementById('theme-select').addEventListener('change', (e) => applyTheme(e.target.value));
+        const notifDate = document.getElementById('dr-notificationDate');
+        const duration = document.getElementById('dr-executionDuration');
+        [notifDate, duration].forEach(el => el.addEventListener('input', calculateDeadline));
+    }
+
+    function renderAll() {
+        renderDRLists();
+        updateStatsAndDashboard();
+        renderAdminSection();
+        initOrUpdateCharts();
+        updateNotifications();
+    }
+
+    // ========== CONVERSION DEVISE ==========
+    function convertCurrency(amount, toDh = true) {
+        return toDh ? amount * TAUX_CONVERSION : amount / TAUX_CONVERSION;
+    }
+
+    function formatCurrency(value, currency = 'EUR') {
+        if (currency === 'MAD') {
+            return new Intl.NumberFormat('fr-FR', { 
+                style: 'currency', 
+                currency: 'MAD' 
+            }).format(value || 0);
+        } else {
+            return new Intl.NumberFormat('fr-FR', { 
+                style: 'currency', 
+                currency: 'EUR' 
+            }).format(value || 0);
+        }
+    }
+
+    // ========== UI & NAVIGATION ==========
+    function showSection(sectionId) {
+        document.querySelectorAll('.section').forEach(section => section.style.display = 'none');
+        document.getElementById(sectionId + '-section').style.display = 'block';
+        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        const activeLink = document.querySelector(`.nav-link[onclick*="'${sectionId}'"]`);
+        if (activeLink) activeLink.classList.add('active');
+        const titles = {
+            'dashboard': { title: 'Tableau de Bord', sub: 'Analyse et suivi des demandes' },
+            'dr-list': { title: 'Liste des DR', sub: 'Consultez, filtrez et recherchez les demandes' },
+            'settings': { title: 'Paramètres', sub: 'Gérez la configuration de l\'application' }
+        };
+        if (titles[sectionId]) {
+            document.getElementById('page-title-text').textContent = titles[sectionId].title;
+            document.getElementById('page-subtitle-text').textContent = titles[sectionId].sub;
+        }
+    }
+    
+    function showSectionWithAuth(sectionId) {
+        const enteredPassword = prompt("Veuillez entrer le mot de passe administrateur :");
+        if (enteredPassword === adminSettings.password) {
+            showSection(sectionId);
+        } else if (enteredPassword !== null) {
+            alert("Mot de passe incorrect.");
+        }
+    }
+
+    function showModal(modalId) { 
+        document.getElementById(modalId).style.display = 'flex'; 
+    }
+    
+    function hideModal(modalId) { 
+        document.getElementById(modalId).style.display = 'none'; 
+    }
+    
+    function applyTheme(theme) {
+        document.documentElement.className = theme;
+        localStorage.setItem('suividr_theme', theme);
+        initOrUpdateCharts();
+    }
+    
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+    
+    // ========== NOTIFICATIONS ==========
+    function toggleNotifications(e) {
+        if (e) e.stopPropagation();
+        const panel = document.getElementById('notifications-panel');
+        notificationsPanelVisible = !notificationsPanelVisible;
+        panel.style.display = notificationsPanelVisible ? 'block' : 'none';
+    }
+
+    function getNotifications() {
+        const now = new Date();
+        const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        let alerts = [];
+        
+        demandesRealisation.forEach(dr => {
+            if (dr.status && dr.status !== 'termine' && dr.status !== 'annule' && dr.deadline) {
+                try {
+                    const deadline = new Date(dr.deadline);
+                    if (isNaN(deadline.getTime())) return; // Skip if invalid date
+                    
+                    const diffTime = deadline - now;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays < 0) {
+                        alerts.push({ 
+                            type: 'danger', 
+                            message: `DR <b>${dr.number}</b> est en retard de ${Math.abs(diffDays)} jours.`, 
+                            drId: dr.id 
+                        });
+                    } else if (deadline <= oneWeekFromNow) {
+                        alerts.push({ 
+                            type: 'warning', 
+                            message: `DR <b>${dr.number}</b> arrive à échéance dans ${diffDays} jours.`, 
+                            drId: dr.id 
+                        });
+                    }
+                } catch (e) {
+                    console.error("Erreur de traitement de date pour la DR:", dr.number, e);
+                }
+            }
+        });
+        
+        return alerts.sort((a, b) => a.type.localeCompare(b.type));
+    }
+
+    function updateNotifications() {
+        try {
+            const alerts = getNotifications();
+            const count = alerts.length;
+            const countBadge = document.getElementById('notification-count');
+            const listElement = document.getElementById('notifications-list');
             
-            // Render DR lists
-            renderFullDRList();
-            renderDeadlineDRList();
+            countBadge.style.display = count > 0 ? 'flex' : 'none';
+            countBadge.textContent = count;
             
-            // Form submission
-            document.getElementById('dr-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                addNewDR();
-            });
+            listElement.innerHTML = alerts.length 
+                ? alerts.map(alert => `
+                    <div class="notification-item ${alert.type}" onclick="showDRInList(${alert.drId})">
+                        <i class="fas ${alert.type === 'danger' ? 'fa-exclamation-circle' : 'fa-clock'}"></i>
+                        <div class="notification-item-content">${alert.message}</div>
+                    </div>
+                  `).join('') 
+                : '<div class="notification-item">Aucune alerte pour le moment.</div>';
+        } catch (e) {
+            console.error("Erreur dans updateNotifications:", e);
+        }
+    }
+
+    function showDRInList(drId) {
+        showSection('dr-list');
+        setTimeout(() => {
+            const row = document.querySelector(`tr[data-dr-id="${drId}"]`);
+            if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                row.classList.add('highlight');
+                setTimeout(() => row.classList.remove('highlight'), 2000);
+            }
+            toggleNotifications();
+        }, 100);
+    }
+
+    // ========== HISTORIQUE ==========
+    function addToHistory(dr, action, detail = '') {
+        if (!dr.history) dr.history = [];
+        dr.history.unshift({ 
+            timestamp: new Date().toISOString(), 
+            user: adminSettings.adminName, 
+            action: action, 
+            detail: detail 
+        });
+    }
+
+    function showHistory(drId) {
+        const dr = demandesRealisation.find(d => d.id === drId);
+        if (!dr || !dr.history || dr.history.length === 0) { 
+            showToast("Aucun historique pour cette DR."); 
+            return; 
+        }
+        document.getElementById('history-modal-title').textContent = `Historique de la DR ${dr.number}`;
+        document.getElementById('history-modal-body').innerHTML = dr.history.map(item => `
+            <div class="history-item">
+                <b>${item.action}</b> par <i>${item.user}</i>
+                ${item.detail ? `<br>${item.detail}` : ''}
+                <span class="history-timestamp">${new Date(item.timestamp).toLocaleString('fr-FR')}</span>
+            </div>
+        `).join('');
+        showModal('history-modal');
+    }
+
+    // ========== ADMIN & SETTINGS ==========
+    function updateAdminName() {
+        const name = document.getElementById('admin-name-input').value.trim();
+        if (name) {
+            adminSettings.adminName = name;
+            saveAdminSettings();
+            updateAdminDisplay(name);
+            showToast('Nom admin mis à jour !');
+        }
+    }
+    
+    function updateAdminDisplay(name) {
+        document.getElementById('admin-name').textContent = name;
+        document.querySelector('.user-avatar').textContent = name.charAt(0).toUpperCase();
+    }
+    
+    function renderAdminSection() {
+        renderListManager('assignees');
+        renderListManager('statuses');
+        populateFormSelects();
+    }
+
+    function renderListManager(type) {
+        const container = document.getElementById(`${type}-list`);
+        container.innerHTML = adminSettings[type].map((item, index) => `
+            <span class="list-item">${item} 
+                <button onclick="removeListItem('${type}', ${index})">&times;</button>
+            </span>
+        `).join('');
+    }
+    
+    function addListItem(type) {
+        const input = document.getElementById(`new-${type}-input`);
+        const value = input.value.trim();
+        if (value && !adminSettings[type].includes(value)) {
+            adminSettings[type].push(value);
+            saveAdminSettings();
+            renderAdminSection();
+            setupFilters();
+            input.value = '';
+            showToast(`${type === 'assignees' ? 'Attributaire' : 'Statut'} ajouté avec succès`);
+        }
+    }
+
+    function removeListItem(type, index) {
+        adminSettings[type].splice(index, 1);
+        saveAdminSettings();
+        renderAdminSection();
+        setupFilters();
+        showToast(`${type === 'assignees' ? 'Attributaire' : 'Statut'} supprimé`);
+    }
+
+    // ========== DR MANAGEMENT ==========
+    function openNewDRModal() {
+        document.getElementById('dr-form').reset();
+        document.getElementById('dr-id').value = '';
+        document.getElementById('modal-title').textContent = 'Nouvelle Demande de Réalisation';
+        populateFormSelects();
+        showModal('dr-modal');
+    }
+    
+    function editDR(drId) {
+        const dr = demandesRealisation.find(item => item.id === drId);
+        if (!dr) return;
+        document.getElementById('modal-title').textContent = 'Modifier la Demande';
+        document.getElementById('dr-id').value = dr.id;
+        Object.keys(dr).forEach(key => {
+            const el = document.getElementById(`dr-${key}`);
+            if (el) el.value = dr[key];
+        });
+        populateFormSelects(dr.status);
+        showModal('dr-modal');
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('dr-id').value;
+        const drData = {
+            number: document.getElementById('dr-number').value,
+            object: document.getElementById('dr-object').value,
+            marketEstimate: document.getElementById('dr-marketEstimate').value,
+            assignee: document.getElementById('dr-assignee').value,
+            notificationDate: document.getElementById('dr-notificationDate').value,
+            executionDuration: document.getElementById('dr-executionDuration').value,
+            deadline: document.getElementById('dr-deadline').value,
+            status: document.getElementById('dr-status').value,
+            notes: document.getElementById('dr-notes').value,
+        };
+
+        if (id) {
+            // Modification d'une DR existante
+            const index = demandesRealisation.findIndex(dr => dr.id == id);
+            const oldDr = { ...demandesRealisation[index] };
+            demandesRealisation[index] = { ...oldDr, ...drData };
+            const statusChanged = oldDr.status !== drData.status;
+            addToHistory(demandesRealisation[index], statusChanged ? 'Changement de statut' : 'Mise à jour', 
+                         statusChanged ? `De '${oldDr.status}' à '${drData.status}'.` : '');
+            showToast('DR mise à jour !');
+        } else {
+            // Création d'une nouvelle DR
+            const newDr = { 
+                ...drData, 
+                id: Date.now(), 
+                createdAt: new Date().toISOString(),
+                history: []
+            };
+            addToHistory(newDr, 'Création de la DR', `Statut initial: ${newDr.status}`);
+            demandesRealisation.unshift(newDr);
+            showToast('Nouvelle DR enregistrée !');
+        }
+
+        saveToLocalStorage();
+        renderAll();
+        hideModal('dr-modal');
+    }
+    
+    function deleteDR(drId) {
+        if (confirm('Voulez-vous vraiment supprimer cette demande ?')) {
+            demandesRealisation = demandesRealisation.filter(item => item.id !== drId);
+            saveToLocalStorage();
+            renderAll();
+            showToast('DR supprimée.');
+        }
+    }
+    
+    function calculateDeadline() {
+        const notifDateStr = document.getElementById('dr-notificationDate').value;
+        const duration = parseInt(document.getElementById('dr-executionDuration').value, 10);
+        if (notifDateStr && !isNaN(duration)) {
+            const date = new Date(notifDateStr);
+            date.setDate(date.getDate() + duration);
+            document.getElementById('dr-deadline').value = date.toISOString().split('T')[0];
+        }
+    }
+
+    function populateFormSelects(selectedStatus) {
+        const statusSelect = document.getElementById('dr-status');
+        statusSelect.innerHTML = adminSettings.statuses.map(status => {
+            const value = status.toLowerCase().replace(/ /g, '-').replace(/à/g, 'a');
+            return `<option value="${value}" ${value === selectedStatus ? 'selected' : ''}>${status}</option>`;
+        }).join('');
+        
+        const assigneeDatalist = document.getElementById('assignee-datalist');
+        assigneeDatalist.innerHTML = adminSettings.assignees.map(item => `<option value="${item}"></option>`).join('');
+    }
+    
+    // ========== FILTRES & RENDERING LISTS ==========
+    function setupFilters() {
+        const statusFilter = document.getElementById('filter-status');
+        const assigneeFilter = document.getElementById('filter-assignee');
+        
+        statusFilter.innerHTML = '<option value="">Tous les statuts</option>' + 
+            adminSettings.statuses.map(s => `<option value="${toKebabCase(s)}">${s}</option>`).join('');
             
-            // Restore file handler
-            document.getElementById('restore-file').addEventListener('change', function(e) {
-                restoreData(e);
-            });
+        assigneeFilter.innerHTML = '<option value="">Tous les attributaires</option>' + 
+            adminSettings.assignees.map(a => `<option value="${a}">${a}</option>`).join('');
+            
+        [statusFilter, assigneeFilter, document.getElementById('search-bar')].forEach(el => 
+            el.addEventListener('input', applyFilters)
+        );
+    }
+    
+    function applyFilters() {
+        renderFullDRList();
+    }
+    
+    function resetFilters() {
+        document.getElementById('search-bar').value = '';
+        document.getElementById('filter-status').value = '';
+        document.getElementById('filter-assignee').value = '';
+        renderFullDRList();
+    }
+
+    function renderDRLists() {
+        renderFullDRList();
+        renderRecentDRList();
+    }
+    
+    function renderFullDRList() {
+        const tbody = document.getElementById('full-dr-list');
+        const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+        const statusFilter = document.getElementById('filter-status').value;
+        const assigneeFilter = document.getElementById('filter-assignee').value;
+
+        let filteredDRs = demandesRealisation.filter(dr => {
+            const searchMatch = !searchTerm || 
+                (dr.number && dr.number.toLowerCase().includes(searchTerm)) || 
+                (dr.object && dr.object.toLowerCase().includes(searchTerm));
+            const statusMatch = !statusFilter || dr.status === statusFilter;
+            const assigneeMatch = !assigneeFilter || dr.assignee === assigneeFilter;
+            return searchMatch && statusMatch && assigneeMatch;
         });
 
-        // Initialize charts
-        function initCharts() {
-            // Status over time chart
-            const statusCtx = document.getElementById('status-chart').getContext('2d');
-            const statusChart = new Chart(statusCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
-                    datasets: [
-                        {
-                            label: 'Nouvelles DR',
-                            data: [5, 8, 6, 7],
-                            borderColor: '#4361ee',
-                            backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: 'DR terminées',
-                            data: [2, 4, 5, 6],
-                            borderColor: '#4cc9f0',
-                            backgroundColor: 'rgba(76, 201, 240, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: 'DR urgentes',
-                            data: [1, 2, 1, 3],
-                            borderColor: '#ef233c',
-                            backgroundColor: 'rgba(239, 35, 60, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            // Pie chart
-            const pieCtx = document.getElementById('pie-chart').getContext('2d');
-            const pieChart = new Chart(pieCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['En cours', 'Terminées', 'Urgentes', 'À valider'],
-                    datasets: [{
-                        data: [12, 18, 5, 3],
-                        backgroundColor: [
-                            '#4361ee',
-                            '#4cc9f0',
-                            '#ef233c',
-                            '#f8961e'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                        }
-                    },
-                    cutout: '70%'
-                }
-            });
-
-            // Performance chart
-            const perfCtx = document.getElementById('performance-chart').getContext('2d');
-            const perfChart = new Chart(perfCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Entreprise A', 'Entreprise B', 'Entreprise C', 'Entreprise D', 'Entreprise E'],
-                    datasets: [
-                        {
-                            label: 'DR complétées',
-                            data: [8, 5, 6, 7, 4],
-                            backgroundColor: '#4cc9f0'
-                        },
-                        {
-                            label: 'DR en retard',
-                            data: [1, 2, 0, 1, 1],
-                            backgroundColor: '#ef233c'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        x: {
-                            stacked: true,
-                        },
-                        y: {
-                            stacked: true,
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            // Timeline chart
-            const timelineCtx = document.getElementById('timeline-chart').getContext('2d');
-            const timelineChart = new Chart(timelineCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Peinture', 'Électricité', 'Plomberie', 'Menuiserie', 'Maçonnerie'],
-                    datasets: [{
-                        label: 'Délai moyen (jours)',
-                        data: [18, 22, 15, 25, 30],
-                        backgroundColor: [
-                            '#4361ee',
-                            '#4cc9f0',
-                            '#3f37c9',
-                            '#4895ef',
-                            '#7209b7'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
+        tbody.innerHTML = filteredDRs.length ? 
+            filteredDRs.map(dr => createDRRowHTML(dr, true)).join('') : 
+            '<tr><td colspan="7" style="text-align:center;">Aucune demande trouvée.</td></tr>';
+    }
+    
+    function renderRecentDRList() {
+        const tbody = document.getElementById('recent-dr-list');
+        const recentDRs = [...demandesRealisation]
+            .sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+            .slice(0, 5);
+        tbody.innerHTML = recentDRs.length ? 
+            recentDRs.map(dr => createDRRowHTML(dr, false)).join('') : 
+            '<tr><td colspan="5" style="text-align:center;">Aucune demande récente.</td></tr>';
+    }
+    
+    // ========== HTML GENERATORS & UTILITIES ==========
+    function createDRRowHTML(dr, isFullList) {
+        const now = new Date();
+        const deadline = dr.deadline ? new Date(dr.deadline) : null;
+        let daysRemainingText = '-';
+        let color = 'inherit';
+        
+        if(deadline && dr.status !== 'termine' && dr.status !== 'annule') {
+            const diffDays = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+            daysRemainingText = diffDays < 0 ? `En retard de ${Math.abs(diffDays)}j` : `${diffDays}j restants`;
+            color = diffDays < 0 ? 'var(--danger)' : (diffDays < 7 ? 'var(--warning)' : 'inherit');
         }
+        
+        return `
+            <tr data-dr-id="${dr.id}">
+                <td class="dr-number">${dr.number || '-'}</td>
+                <td>${dr.object || '-'}</td>
+                ${isFullList ? `<td>${dr.marketEstimate ? formatCurrency(dr.marketEstimate) : '-'}</td>` : ''}
+                <td>${dr.assignee || '-'}</td>
+                ${isFullList ? `<td style="color:${color}">${daysRemainingText}</td>` : ''}
+                <td><span class="status-badge status-${dr.status || 'normal'}">${(dr.status || 'normal').replace(/-/g, ' ')}</span></td>
+                <td>${getActionButtons(dr.id)}</td>
+            </tr>
+        `;
+    }
+    
+    function getActionButtons(drId) {
+        return `
+            <button class="action-btn" title="Éditer" onclick="editDR(${drId})">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="action-btn" title="Historique" onclick="showHistory(${drId})">
+                <i class="fas fa-history"></i>
+            </button>
+            <button class="action-btn" title="Supprimer" onclick="deleteDR(${drId})">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+    }
 
-        // Show/hide sections
-        function showSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.style.display = 'none';
-            });
+    // ========== STATS & CHARTS ==========
+    function updateStatsAndDashboard() {
+        const drInProgress = demandesRealisation.filter(dr => 
+            dr.status && dr.status !== 'termine' && dr.status !== 'annule'
+        );
+        const drCompleted = demandesRealisation.filter(dr => 
+            dr.status && dr.status === 'termine'
+        );
+        const totalCost = demandesRealisation.reduce((sum, dr) => 
+            sum + (parseFloat(dr.marketEstimate) || 0), 0
+        );
+        const avgCost = demandesRealisation.length > 0 ? 
+            (totalCost / demandesRealisation.length) : 0;
             
-            // Show selected section
-            document.getElementById(sectionId + '-section').style.display = 'block';
+        document.getElementById('dr-in-progress').textContent = drInProgress.length;
+        document.getElementById('dr-completed').textContent = drCompleted.length;
+        
+        // Affichage des coûts en EUR et MAD
+        document.getElementById('dr-total-cost').innerHTML = `
+            ${formatCurrency(totalCost)}<br>
+            <small>${formatCurrency(convertCurrency(totalCost), 'MAD')}</small>
+        `;
+        
+        document.getElementById('dr-avg-cost').innerHTML = `
+            ${formatCurrency(avgCost)}<br>
+            <small>${formatCurrency(convertCurrency(avgCost), 'MAD')}</small>
+        `;
+    }
+    
+    function initOrUpdateCharts() {
+        const statusCounts = demandesRealisation.reduce((acc, dr) => { 
+            const status = dr.status || 'normal';
+            acc[status] = (acc[status] || 0) + 1; 
+            return acc; 
+        }, {});
+        
+        updateChart('status-pie-chart', 'doughnut', { 
+            labels: Object.keys(statusCounts).map(s => s.replace(/-/g, ' ')), 
+            datasets: [{ 
+                data: Object.values(statusCounts), 
+                backgroundColor: Object.keys(statusCounts).map(status => getStatusColor(status)), 
+                borderWidth: 0 
+            }] 
+        }, { 
+            cutout: '70%', 
+            plugins: { legend: { position: 'right' } } 
+        });
+        
+        const costByStatus = demandesRealisation.reduce((acc, dr) => { 
+            const status = dr.status || 'normal';
+            const cost = parseFloat(dr.marketEstimate) || 0; 
+            if (cost > 0) { 
+                acc[status] = (acc[status] || 0) + cost; 
+            } 
+            return acc; 
+        }, {});
+        
+        updateChart('cost-pie-chart', 'pie', { 
+            labels: Object.keys(costByStatus).map(s => s.replace(/-/g, ' ')), 
+            datasets: [{ 
+                data: Object.values(costByStatus), 
+                backgroundColor: Object.keys(costByStatus).map(status => getStatusColor(status))
+            }] 
+        }, { 
+            plugins: { legend: { position: 'right' } } 
+        });
+    }
+    
+    function updateChart(canvasId, type, data, options) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        if (charts[canvasId]) charts[canvasId].destroy();
+        charts[canvasId] = new Chart(ctx, { 
+            type: type, 
+            data: data, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                ...options 
+            } 
+        });
+    }
+
+    // ========== DATA IMPORT/EXPORT & UTILS ==========
+    function saveToLocalStorage() { 
+        localStorage.setItem('suividr_data', JSON.stringify(demandesRealisation)); 
+    }
+    
+    function saveAdminSettings() { 
+        localStorage.setItem('suividr_settings', JSON.stringify(adminSettings)); 
+    }
+    
+    function toKebabCase(str) { 
+        return str.toLowerCase().replace(/ /g, '-').replace(/à/g, 'a'); 
+    }
+    
+    function getStatusColor(status) {
+        const getStyle = (variable) => getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+        const colorMap = { 
+            'urgent': '--danger', 
+            'a-valider': '--warning', 
+            'termine': '--success', 
+            'cmd-en-attente': '--primary', 
+            'annule': '--gray' 
+        };
+        return getStyle(colorMap[status] || '--primary-light');
+    }
+    
+    function exportToExcel() {
+        try {
+            const data = demandesRealisation.map(dr => ({
+                'N° DR': dr.number,
+                'Objet': dr.object,
+                'Estimation (€)': dr.marketEstimate,
+                'Estimation (MAD)': dr.marketEstimate ? convertCurrency(dr.marketEstimate) : '',
+                'Attributaire': dr.assignee,
+                'Statut': dr.status ? dr.status.replace(/-/g, ' ') : 'Normal',
+                'Date Notification': dr.notificationDate,
+                'Date Limite': dr.deadline,
+                'Observations': dr.notes
+            }));
             
-            // Update active nav link
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            // Find and activate the corresponding nav link
-            const navLinks = document.querySelectorAll('.nav-link');
-            for (let i = 0; i < navLinks.length; i++) {
-                if (navLinks[i].getAttribute('onclick').includes(sectionId)) {
-                    navLinks[i].classList.add('active');
-                    break;
-                }
-            }
-            
-            // Special case for dashboard
-            if (sectionId === 'dashboard') {
-                document.querySelector('.nav-link[onclick="showSection(\'dashboard\')"]').classList.add('active');
-            }
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Demandes");
+            XLSX.writeFile(workbook, "demandes_realisation.xlsx");
+            showToast('Export Excel réussi !');
+        } catch (e) {
+            console.error("Erreur lors de l'export Excel :", e);
+            showToast('Erreur lors de l\'export');
         }
-
-        // Modal functions
-        function showModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
-
-        function hideModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Add new DR
-        function addNewDR() {
-            const newDR = {
-                id: Date.now(),
-                number: document.getElementById('dr-number').value,
-                object: document.getElementById('dr-object').value,
-                marketEstimate: document.getElementById('dr-market-estimate').value,
-                marketNumber: document.getElementById('dr-market-number').value,
-                assignee: document.getElementById('dr-assignee').value,
-                notificationDate: document.getElementById('dr-notification-date').value,
-                executionDuration: document.getElementById('dr-execution-duration').value,
-                deadline: document.getElementById('dr-deadline').value,
-                received: document.getElementById('dr-received').value,
-                receptionDate: document.getElementById('dr-reception-date').value,
-                status: document.getElementById('dr-status').value,
-                notes: document.getElementById('dr-notes').value,
-                createdAt: new Date().toISOString()
+    }
+    
+    function backupData() {
+        try {
+            const data = {
+                demandes: demandesRealisation,
+                settings: adminSettings
             };
-            
-            demandesRealisation.unshift(newDR);
-            saveToLocalStorage();
-            renderFullDRList();
-            renderDeadlineDRList();
-            hideModal('add-dr-modal');
-            document.getElementById('dr-form').reset();
-            
-            // Show success message
-            alert('Demande de réalisation enregistrée avec succès !');
-        }
-
-        // Render full DR list
-        function renderFullDRList() {
-            const tbody = document.getElementById('full-dr-list');
-            tbody.innerHTML = '';
-            
-            demandesRealisation.forEach(dr => {
-                const row = document.createElement('tr');
-                
-                let statusBadge = '';
-                switch(dr.status) {
-                    case 'urgent':
-                        statusBadge = '<span class="status-badge status-urgent">Urgent</span>';
-                        break;
-                    case 'validate':
-                        statusBadge = '<span class="status-badge status-validate">À valider</span>';
-                        break;
-                    case 'pending':
-                        statusBadge = '<span class="status-badge status-pending">CMD en attente</span>';
-                        break;
-                    case 'completed':
-                        statusBadge = '<span class="status-badge status-completed">Terminé</span>';
-                        break;
-                    default:
-                        statusBadge = '<span class="status-badge">Normal</span>';
-                }
-                
-                row.innerHTML = `
-                    <td class="dr-number">${dr.number}</td>
-                    <td>${dr.object}</td>
-                    <td>${dr.marketEstimate ? dr.marketEstimate + ' €' : '-'}</td>
-                    <td>${dr.assignee || '-'}</td>
-                    <td>${dr.deadline ? formatDate(dr.deadline) : '-'}</td>
-                    <td>${statusBadge}</td>
-                    <td>
-                        <button class="action-btn" title="Éditer" onclick="editDR(${dr.id})"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn" title="Supprimer" onclick="deleteDR(${dr.id})"><i class="fas fa-trash"></i></button>
-                    </td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-        }
-
-        // Render DRs approaching deadline
-        function renderDeadlineDRList() {
-            const tbody = document.getElementById('deadline-dr-list');
-            tbody.innerHTML = '';
-            
-            // Filter DRs with deadline in the next 14 days
-            const now = new Date();
-            const upcomingDRs = demandesRealisation.filter(dr => {
-                if (!dr.deadline || dr.received === 'oui') return false;
-                
-                const deadline = new Date(dr.deadline);
-                const diffTime = deadline - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                
-                return diffDays <= 14 && diffDays >= 0;
-            });
-            
-            // Sort by closest deadline
-            upcomingDRs.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-            
-            if (upcomingDRs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucune DR arrivant à échéance dans les 14 prochains jours</td></tr>';
-                return;
-            }
-            
-            upcomingDRs.forEach(dr => {
-                const row = document.createElement('tr');
-                
-                const deadline = new Date(dr.deadline);
-                const diffTime = deadline - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                
-                let statusBadge = '';
-                switch(dr.status) {
-                    case 'urgent':
-                        statusBadge = '<span class="status-badge status-urgent">Urgent</span>';
-                        break;
-                    case 'validate':
-                        statusBadge = '<span class="status-badge status-validate">À valider</span>';
-                        break;
-                    case 'pending':
-                        statusBadge = '<span class="status-badge status-pending">CMD en attente</span>';
-                        break;
-                    case 'completed':
-                        statusBadge = '<span class="status-badge status-completed">Terminé</span>';
-                        break;
-                    default:
-                        statusBadge = '<span class="status-badge">Normal</span>';
-                }
-                
-                row.innerHTML = `
-                    <td class="dr-number">${dr.number}</td>
-                    <td>${dr.object}</td>
-                    <td>${dr.assignee || '-'}</td>
-                    <td>${diffDays} jour(s)</td>
-                    <td>${statusBadge}</td>
-                    <td>
-                        <button class="action-btn" title="Éditer" onclick="editDR(${dr.id})"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn" title="Supprimer" onclick="deleteDR(${dr.id})"><i class="fas fa-trash"></i></button>
-                    </td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-        }
-
-        // Edit DR
-        function editDR(drId) {
-            const dr = demandesRealisation.find(item => item.id === drId);
-            if (!dr) return;
-            
-            // Fill the form
-            document.getElementById('dr-number').value = dr.number;
-            document.getElementById('dr-object').value = dr.object;
-            document.getElementById('dr-market-estimate').value = dr.marketEstimate;
-            document.getElementById('dr-market-number').value = dr.marketNumber;
-            document.getElementById('dr-assignee').value = dr.assignee;
-            document.getElementById('dr-notification-date').value = dr.notificationDate;
-            document.getElementById('dr-execution-duration').value = dr.executionDuration;
-            document.getElementById('dr-deadline').value = dr.deadline;
-            document.getElementById('dr-received').value = dr.received;
-            document.getElementById('dr-reception-date').value = dr.receptionDate;
-            document.getElementById('dr-status').value = dr.status;
-            document.getElementById('dr-notes').value = dr.notes;
-            
-            // Remove the old DR
-            demandesRealisation = demandesRealisation.filter(item => item.id !== drId);
-            
-            // Show the modal
-            showModal('add-dr-modal');
-        }
-
-        // Delete DR
-        function deleteDR(drId) {
-            if (confirm('Voulez-vous vraiment supprimer cette demande de réalisation ?')) {
-                demandesRealisation = demandesRealisation.filter(item => item.id !== drId);
-                saveToLocalStorage();
-                renderFullDRList();
-                renderDeadlineDRList();
-            }
-        }
-
-        // Export to Excel
-        function exportToExcel() {
-            // Prepare data
-            const data = [
-                ['N° DR', 'Objet', 'Estimation Marché', 'N° Marché', 'Attributaire', 'Date Notification', 
-                 'Durée Exécution (jours)', 'Date Limite', 'Réceptionné', 'Date Réception', 'Statut', 'Observations']
-            ];
-            
-            demandesRealisation.forEach(dr => {
-                data.push([
-                    dr.number,
-                    dr.object,
-                    dr.marketEstimate || '',
-                    dr.marketNumber || '',
-                    dr.assignee || '',
-                    dr.notificationDate ? formatDate(dr.notificationDate) : '',
-                    dr.executionDuration || '',
-                    dr.deadline ? formatDate(dr.deadline) : '',
-                    dr.received === 'oui' ? 'Oui' : 'Non',
-                    dr.receptionDate ? formatDate(dr.receptionDate) : '',
-                    getStatusText(dr.status),
-                    dr.notes || ''
-                ]);
-            });
-            
-            // Create workbook
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            XLSX.utils.book_append_sheet(wb, ws, 'SuiviDR');
-            
-            // Export
-            XLSX.writeFile(wb, `SuiviDR_Export_${new Date().toISOString().slice(0,10)}.xlsx`);
-        }
-
-        // Backup data
-        function backupData() {
-            const dataStr = JSON.stringify(demandesRealisation);
-            const blob = new Blob([dataStr], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `suividr_backup_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `suividr_backup_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Sauvegarde JSON réussie !');
+        } catch (e) {
+            console.error("Erreur lors de la sauvegarde :", e);
+            showToast('Erreur lors de la sauvegarde');
         }
-
-        // Restore data
-        function restoreData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (confirm(`Voulez-vous vraiment restaurer ${data.length} demandes de réalisation ? Cela écrasera les données actuelles.`)) {
-                        demandesRealisation = data;
-                        saveToLocalStorage();
-                        renderFullDRList();
-                        renderDeadlineDRList();
-                        alert('Données restaurées avec succès !');
+    }
+    
+    function restoreData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (confirm('Voulez-vous vraiment restaurer ces données ? Cela écrasera les données actuelles.')) {
+                    if (data.demandes) {
+                        demandesRealisation = data.demandes;
+                        localStorage.setItem('suividr_data', JSON.stringify(demandesRealisation));
                     }
-                } catch (error) {
-                    alert('Erreur lors de la lecture du fichier. Format invalide.');
+                    if (data.settings) {
+                        adminSettings = data.settings;
+                        localStorage.setItem('suividr_settings', JSON.stringify(adminSettings));
+                    }
+                    renderAll();
+                    showToast('Données restaurées avec succès !');
                 }
-            };
-            reader.readAsText(file);
-            
-            // Reset file input
-            event.target.value = '';
-        }
-
-        // Save to localStorage
-        function saveToLocalStorage() {
-            localStorage.setItem('suividr_data', JSON.stringify(demandesRealisation));
-        }
-
-        // Helper functions
-        function formatDate(dateStr) {
-            if (!dateStr) return '';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('fr-FR');
-        }
-
-        function getStatusText(status) {
-            switch(status) {
-                case 'urgent': return 'Urgent';
-                case 'validate': return 'À valider';
-                case 'pending': return 'CMD en attente';
-                case 'completed': return 'Terminé';
-                default: return 'Normal';
+            } catch (e) {
+                console.error("Erreur lors de la restauration :", e);
+                showToast('Erreur: fichier JSON invalide');
             }
-        }
+            event.target.value = ''; // Reset input
+        };
+        reader.readAsText(file);
+    }
     </script>
 </body>
 </html>
